@@ -21,9 +21,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libxml2-dev \
     libxslt1-dev \
     libz-dev \
-    libreadstat-dev \
-    curl \
     && rm -rf /var/lib/apt/lists/*
+
 
 # ====== Répertoire de travail ======
 WORKDIR /app
@@ -47,3 +46,4 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
 
 # ====== Lancement Uvicorn optimisé ======
 CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8080", "--workers", "1"]
+
