@@ -11,17 +11,8 @@ ENV PYTHONDONTWRITEBYTECODE=1 \
     DEBIAN_FRONTEND=noninteractive
 
 # ====== Dépendances système ======
-RUN apt-get update && apt-get install -y --no-install-recommends \
-    build-essential \
-    gfortran \
-    libatlas-base-dev \
-    liblapack-dev \
-    libpng-dev \
-    libjpeg62-turbo-dev \
-    libxml2-dev \
-    libxslt1-dev \
-    libz-dev \
-    && rm -rf /var/lib/apt/lists/*
+RUN apt-get update && apt-get install -y curl && rm -rf /var/lib/apt/lists/*
+
 
 
 # ====== Répertoire de travail ======
@@ -46,4 +37,5 @@ HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
 
 # ====== Lancement Uvicorn optimisé ======
 CMD ["uvicorn", "app:app", "--host", "0.0.0.0", "--port", "8080", "--workers", "1"]
+
 
