@@ -378,3 +378,95 @@ def root():
 def health():
     return {"ok": True}
 
+# ================================
+# EXPORT ANALYSIS
+# ================================
+@app.post("/export-analysis")
+async def export_analysis(request: Request):
+    try:
+        data = await request.json()
+        analysis_result = data.get("result")
+
+        if not analysis_result:
+            return JSONResponse(
+                {"status": "error", "message": "No analysis data provided"}, status_code=400
+            )
+
+        return JSONResponse({
+            "status": "success",
+            "export_link": "https://fake-export-link.com/download-file",
+            "message": "Export generated successfully"
+        })
+
+    except Exception as e:
+        return JSONResponse({"status": "error", "message": str(e)}, status_code=500)
+
+
+# ================================
+# INTERPRET RESULTS
+# ================================
+@app.post("/interpret-results")
+async def interpret_results(request: Request):
+    try:
+        data = await request.json()
+        stats = data.get("stats")
+
+        if not stats:
+            return JSONResponse(
+                {"status": "error", "message": "No stats provided"}, status_code=400
+            )
+
+        interpretation = "Based on your results, the analysis indicates a significant pattern."
+
+        return JSONResponse({
+            "status": "success",
+            "interpretation": interpretation
+        })
+
+    except Exception as e:
+        return JSONResponse({"status": "error", "message": str(e)}, status_code=500)
+
+
+# ================================
+# VALIDATE CREDITS
+# ================================
+@app.post("/validate-credits")
+async def validate_credits(request: Request):
+    try:
+        data = await request.json()
+        user_id = data.get("user_id")
+        credits_needed = data.get("credits")
+
+        if not user_id or credits_needed is None:
+            return JSONResponse(
+                {"status": "error", "message": "Missing user_id or credits_needed"},
+                status_code=400
+            )
+
+        # Fake validation
+        return JSONResponse({
+            "status": "success",
+            "credits_remaining": 500,
+            "allowed": True
+        })
+
+    except Exception as e:
+        return JSONResponse({"status": "error", "message": str(e)}, status_code=500)
+
+
+# ================================
+# PAYMENT WEBHOOK
+# ================================
+@app.post("/payment-webhook")
+async def payment_webhook(request: Request):
+    try:
+        payload = await request.json()
+        print("PAYMENT RECEIVED:", payload)
+
+        return JSONResponse({"status": "success", "message": "Payment processed"})
+
+    except Exception as e:
+        return JSONResponse({"status": "error", "message": str(e)}, status_code=500)
+
+
+
