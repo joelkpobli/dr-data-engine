@@ -23,7 +23,13 @@ from sklearn.cluster import KMeans
 
 # === Initialisation du service ===
 SERVICE_API_KEY = os.getenv("SERVICE_API_KEY", "")
+
 app = FastAPI(title="Dr Data 2.0 - Analysis Engine", version="1.2")
+
+@app.get("/smartcheck")
+async def smart_check():
+    return {"status": "ok", "message": "Smart check working successfully"}
+
 
 # === CORS (pour Lovable) ===
 app.add_middleware(
@@ -371,3 +377,4 @@ def root():
 @app.get("/health")
 def health():
     return {"ok": True}
+
