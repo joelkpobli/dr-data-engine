@@ -3,7 +3,7 @@ from typing import List, Optional, Dict, Any
 
 import numpy as np
 import pandas as pd
-from fastapi import FastAPI, HTTPException, Request
+from fastapi import FastAPI, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from pydantic import BaseModel
 
@@ -12,7 +12,6 @@ matplotlib.use("Agg")
 import matplotlib.pyplot as plt
 
 from scipy import stats
-from scipy.stats import chi2_contingency, shapiro, levene, mannwhitneyu, wilcoxon, kruskal
 import statsmodels.api as sm
 import statsmodels.formula.api as smf
 from statsmodels.tsa.arima.model import ARIMA
@@ -24,7 +23,7 @@ from sklearn.cluster import KMeans
 # ================================
 SERVICE_API_KEY = os.getenv("SERVICE_API_KEY", "")
 
-app = FastAPI(title="Dr Data 2.0 - Analysis Engine", version="2.0")
+app = FastAPI(title="Dr Data 2.0 - Analysis Engine", version="2.1")
 
 app.add_middleware(
     CORSMiddleware,
@@ -169,7 +168,7 @@ def compute_credit_estimate(profile_type, level, analysis_list):
     return base
 
 # ================================
-# REQUEST MODEL
+# REQUEST MODELS
 # ================================
 class AnalyzeRequest(BaseModel):
     dataset: List[Dict]
@@ -183,8 +182,12 @@ class AnalyzeRequest(BaseModel):
     arima_col: Optional[str] = None
     preferred_software: Optional[str] = None
 
+
+class SmartCheckRequest(BaseModel):
+    dataset: List[Dict]
+
 # ================================
-# MAIN ANALYZE ENDPOINT (JSON ONLY)
+# ANALYZE ENDPOINT
 # ================================
 @app.post("/analyze")
 async def analyze(request: AnalyzeRequest):
@@ -206,14 +209,10 @@ async def analyze(request: AnalyzeRequest):
             results["correlation"] = correlation_analysis(df)
 
         if "regression" in analysis_list and request.dependent_var and request.independent_vars:
-            results["regression"] = regression_analysis(
-                df, request.dependent_var, request.independent_vars
-            )
+            results["regression"] = regression_analysis(df, request.dependent_var, request.independent_vars)
 
         if "anova" in analysis_list and request.dependent_var and request.group_var:
-            results["anova"] = anova_analysis(
-                df, request.dependent_var, request.group_var
-            )
+            results["anova"] = anova_analysis(df, request.dependent_var, request.group_var)
 
         if "pca" in analysis_list:
             results["pca"] = pca_analysis(df)
@@ -239,11 +238,33 @@ async def analyze(request: AnalyzeRequest):
         }
 
     except Exception as e:
+        return {"success": False, "error": str(e)}
+
+# ================================
+# SMARTCHECK ENDPOINT
+# ================================
+@app.post("/smartcheck")
+async def smartcheck(request: SmartCheckRequest):
+    try:
+        df = pd.DataFrame(request.dataset)
+
+        if df.empty:
+            return {"success": False, "error": "Dataset is empty"}
+
+        df = clean_dataframe(df)
+
         return {
-            "success": False,
-            "error": str(e)
+            "success": True,
+            "message": "Smart check completed successfully",
+            "metadata": profile_df(df)
         }
 
+    except Exception as e:
+        return {"success": False, "error": str(e)}
+
+# ================================
+# HEALTH ROUTES
+# ================================
 @app.get("/")
 def root():
     return {"DrData2.0": "API running 🚀"}
